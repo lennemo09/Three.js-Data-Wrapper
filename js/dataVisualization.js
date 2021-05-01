@@ -41,6 +41,18 @@ function drawLine(points, color, thickness=10) {
     return lineMesh;
 }
 
+function plotPoint(x=0, y=0, z=0, radius = 0.3, color = 0x000000) {
+    const geometry = new THREE.SphereGeometry( radius, 32, 32 );
+    const material = new THREE.MeshBasicMaterial( {color: color} );
+    const sphere = new THREE.Mesh( geometry, material );
+    sphere.position.x = x;
+    sphere.position.y = y;
+    sphere.position.z = z;
+    scene.add( sphere );
+
+    return sphere
+}
+
 function drawCartesianAxes(axisLength = 4) {
     let xAxisPoints = [axisLength,0,0,0,0,0];
     let xAxis = drawLine(xAxisPoints,0x00ff00,5);
