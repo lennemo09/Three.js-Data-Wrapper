@@ -22,7 +22,8 @@ var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 var clock = new THREE.Clock();
 var axesGroup;
-
+var pivot = new THREE.Group();
+var dataGeometries = new THREE.Group();
 init();
 
 function drawLine(points, color, thickness=10) {
@@ -50,7 +51,7 @@ function plotPoint(x=0, y=0, z=0, radius = 0.3, color = 0x000000) {
     sphere.position.x = x;
     sphere.position.y = y;
     sphere.position.z = z;
-    scene.add( sphere );
+    dataGeometries.add( sphere );
 
     return sphere
 }
@@ -70,7 +71,7 @@ function drawCartesianAxes(axisLength = 6) {
     axesGroup.add(yAxis);
     axesGroup.add(zAxis);
 
-    scene.add(axesGroup);
+    dataGeometries.add(axesGroup);
     return axesGroup;
 }
 
@@ -95,14 +96,21 @@ function drawRandomPoints(count=10,color=null,size=0.2) {
         randomPointsGroup.add(newPoint);
     }
 
-    scene.add(randomPointsGroup);
+    dataGeometries.add(randomPointsGroup);
     return randomPointsGroup;
 }
 
 function init() {
     axesGroup = drawCartesianAxes(plotRange);
-    let randomPoints = drawRandomPoints(300,null,0.3);
-    render();
+    let randomPoints = drawRandomPoints(250,null,0.3);
+
+    scene.add(pivot);
+
+    // Resets rotation pivot to center of the entire group instead of 0,0,0
+    pivot.add(dataGeometries);
+    dataGeometries.position.set(-plotRange/2,-plotRange/2,-plotRange/2);
+    
+    animate();
 }
 
 onWindowResize();
@@ -124,14 +132,18 @@ function onWindowResize() {
 	renderer.setSize( w, h );
 
 	resolution.set( w, h );
+}
 
+function rotateModel(speed=.02) {
+    pivot.rotation.y += speed;
 }
 
 //window.addEventListener( 'resize', onWindowResize );
 
-function render() {
+function animate() {
 
-    requestAnimationFrame( render );
+    requestAnimationFrame( animate );
+    rotateModel();
     controls.update();
 
 	renderer.render( scene, camera );
