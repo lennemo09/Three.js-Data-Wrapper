@@ -4,30 +4,38 @@
 
 var container = document.getElementById( 'container' );
 
+// Global constants
 var plotRange = 10;
+var scaleMax = 2.25;
+var scaleMin = 0.5;
+var frustumSize = 1000;
+var axisThickness = 10;
+var axisColors = [0x00ff00, 0x0000ff, 0xff0000] // x, y ,z
 
+// Global variables
+let scaleSpeed = .005;
+
+// Scene and camera initialisation
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, .1, 1000 );
 camera.position.set( 0, 20, 20 );
-
-var frustumSize = 1000;
 var resolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
 
+// Renderer initialisation
 var renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true });
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
 container.appendChild( renderer.domElement );
 
+// Camera orbit and mouse control
 var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
-var clock = new THREE.Clock();
+// Global gometry groups
 var axesGroup;
 var modelPivot = new THREE.Group();
 var dataPivot = new THREE.Group();
 var dataGeometries = new THREE.Group();
-let scaleSpeed = .005;
-var scaleMax = 2.25;
-var scaleMin = 0.5;
+
 init();
 
 function drawLine(points, color, thickness=10) {
@@ -60,16 +68,16 @@ function plotPoint(x=0, y=0, z=0, radius = 0.3, color = 0x000000) {
     return sphere
 }
 
-function drawCartesianAxes(axisLength = 6) {
+function drawCartesianAxes(axisLength = 6, axisArrow = false) {
     let xAxisPoints = [axisLength,0,0,0,0,0];
-    let xAxis = drawLine(xAxisPoints,0x00ff00,5);
+    let xAxis = drawLine(xAxisPoints,axisColors[0],axisThickness);
 
     let yAxisPoints = [0,axisLength,0,0,0,0];
-    let yAxis = drawLine(yAxisPoints,0x0000ff,5);
+    let yAxis = drawLine(yAxisPoints,axisColors[1],axisThickness);
 
     let zAxisPoints = [0,0,axisLength,0,0,0];
-    let zAxis = drawLine(zAxisPoints,0xff0000,5);
-
+    let zAxis = drawLine(zAxisPoints,axisColors[2],axisThickness);
+    
     axesGroup = new THREE.Group();
     axesGroup.add(xAxis);
     axesGroup.add(yAxis);
@@ -106,7 +114,7 @@ function drawRandomPoints(count=10,color=null,size=0.2) {
 
 function init() {
     axesGroup = drawCartesianAxes(plotRange);
-    let randomPoints = drawRandomPoints(250,null,0.3);
+    let randomPoints = drawRandomPoints(15,null,0.3);
 
     scene.add(modelPivot);
     scene.add(dataPivot);
@@ -156,20 +164,22 @@ function scaleData(speed=-.01) {
     dataPivot.scale.z += speed;
 }
 
-//window.addEventListener( 'resize', onWindowResize );
-function animate() {
-
-    requestAnimationFrame( animate );
-    rotateData();
-
+function scaleShowcase() {
     if (dataPivot.scale.x >= scaleMax || dataPivot.scale.x <= scaleMin) {
         scaleSpeed *= -1;
         scaleData(scaleSpeed);
     } else {
         scaleData(scaleSpeed);
     }
-    
-    rotateModel(.01);
+}
+
+//window.addEventListener( 'resize', onWindowResize );
+function animate() {
+
+    requestAnimationFrame( animate );
+    //rotateData();
+    //rotateModel(.01);
+    //scaleShowcase();
     controls.update();
 
 	renderer.render( scene, camera );
