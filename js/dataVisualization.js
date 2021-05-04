@@ -22,8 +22,12 @@ var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 var clock = new THREE.Clock();
 var axesGroup;
-var pivot = new THREE.Group();
+var modelPivot = new THREE.Group();
+var dataPivot = new THREE.Group();
 var dataGeometries = new THREE.Group();
+let scaleSpeed = .005;
+var scaleMax = 2.25;
+var scaleMin = 0.5;
 init();
 
 function drawLine(points, color, thickness=10) {
@@ -71,7 +75,7 @@ function drawCartesianAxes(axisLength = 6) {
     axesGroup.add(yAxis);
     axesGroup.add(zAxis);
 
-    dataGeometries.add(axesGroup);
+    scene.add(axesGroup);
     return axesGroup;
 }
 
@@ -104,10 +108,14 @@ function init() {
     axesGroup = drawCartesianAxes(plotRange);
     let randomPoints = drawRandomPoints(250,null,0.3);
 
-    scene.add(pivot);
+    scene.add(modelPivot);
+    scene.add(dataPivot);
 
     // Resets rotation pivot to center of the entire group instead of 0,0,0
-    pivot.add(dataGeometries);
+    modelPivot.add(dataGeometries);
+    dataPivot.add(dataGeometries);
+    modelPivot.add(axesGroup);
+    axesGroup.position.set(-plotRange/2,-plotRange/2,-plotRange/2);
     dataGeometries.position.set(-plotRange/2,-plotRange/2,-plotRange/2);
     
     animate();
@@ -135,15 +143,33 @@ function onWindowResize() {
 }
 
 function rotateModel(speed=.02) {
-    pivot.rotation.y += speed;
+    modelPivot.rotation.y += speed;
+}
+
+function rotateData(speed=.02) {
+    dataPivot.rotation.y += speed;
+}
+
+function scaleData(speed=-.01) {
+    dataPivot.scale.x += speed;
+    dataPivot.scale.y += speed;
+    dataPivot.scale.z += speed;
 }
 
 //window.addEventListener( 'resize', onWindowResize );
-
 function animate() {
 
     requestAnimationFrame( animate );
-    rotateModel();
+    rotateData();
+
+    if (dataPivot.scale.x >= scaleMax || dataPivot.scale.x <= scaleMin) {
+        scaleSpeed *= -1;
+        scaleData(scaleSpeed);
+    } else {
+        scaleData(scaleSpeed);
+    }
+    
+    rotateModel(.01);
     controls.update();
 
 	renderer.render( scene, camera );
