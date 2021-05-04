@@ -40,6 +40,13 @@ var dataGeometries = new THREE.Group();
 
 init();
 
+/**
+ * Function to draw a line between the points given with assigned color and thickness.
+ * @param {List} points A list of floats which every 3 floats being a point in space.
+ * @param {HexNumber} color Hex value for color for the line.
+ * @param {Float} thickness Thickness for the line.
+ * @returns The Mesh() object of the line drawn.
+ */
 function drawLine(points, color, thickness=10) {
     const line = new MeshLine();
     line.setPoints(points);
@@ -58,6 +65,15 @@ function drawLine(points, color, thickness=10) {
     return lineMesh;
 }
 
+/**
+ * Plots a point (with a Sphere geometry) in space using given coordinates.
+ * @param {Float} x Default is 0.
+ * @param {Float} y Default is 0.
+ * @param {Float} z Default is 0.
+ * @param {Float} radius Radius/size for the point mesh. Default is 0.3.
+ * @param {HexNumber} color Hex value for color for the point. Default is black.
+ * @returns The Mesh() object of the point.
+ */
 function plotPoint(x=0, y=0, z=0, radius = 0.3, color = 0x000000) {
     const geometry = new THREE.SphereGeometry( radius, 32, 32 );
     const material = new THREE.MeshBasicMaterial( {color: color} );
@@ -70,6 +86,12 @@ function plotPoint(x=0, y=0, z=0, radius = 0.3, color = 0x000000) {
     return sphere
 }
 
+/**
+ * Draws the Cartesian R3 axes.
+ * @param {Float} axisLength Length of the axis. Default is the range of the plot.
+ * @param {Boolean} axisArrow Enable axis arrowheads. Default is false.
+ * @returns {THREE.Group} The THREE.Group() geometry group containing the axes.
+ */
 function drawCartesianAxes(axisLength = plotRange, axisArrow = false) {
     let xAxisPoints = [axisLength,0,0,0,0,0];
     let xAxis = drawLine(xAxisPoints,axisColors[0],axisThickness);
@@ -112,6 +134,16 @@ function drawCartesianAxes(axisLength = plotRange, axisArrow = false) {
     return axesGroup;
 }
 
+/**
+ * Generates and renders random points within the range given.
+ * If color is not set: Each point will have its color's RGB value based on its x,y,z coordinates.
+ * @param {Number} count Number of points to draw. Default is 10.
+ * @param {Float} min Lower bound of x,y coordinates for the points. Default is 0.
+ * @param {Float} max Upper bound of x,y coordinates for the points. Default is plotRange.
+ * @param {HexNumber} color Color for the points. If null: Points colored based on its coordinates. Default is null.
+ * @param {Float} size Size of the point. Default is 0.2.
+ * @returns {THREE.Group} The THREE.Group() geometry group containing the points.
+ */
 function drawRandomPoints(count=10,min=0,max=plotRange,color=null,size=0.2) {
     let randomColor = false;
     if (color === null) {
@@ -137,6 +169,11 @@ function drawRandomPoints(count=10,min=0,max=plotRange,color=null,size=0.2) {
     return randomPointsGroup;
 }
 
+/**
+ * Initialise the scene.
+ * Draws the axes and data here.
+ * IMPORTANT: Add the model and data into their Pivot groups for animation.
+ */
 function init() {
     axesGroup = drawCartesianAxes(plotRange,true);
     let randomPoints = drawRandomPoints(445,0,plotRange,null,0.3);
@@ -156,6 +193,10 @@ function init() {
 
 onWindowResize();
 
+/**
+ * Handles resizing window.
+ * Not too important based on use cases.
+ */
 function onWindowResize() {
 
 	var w = container.clientWidth;
@@ -175,21 +216,36 @@ function onWindowResize() {
 	resolution.set( w, h );
 }
 
+/**
+ * Animate: Rotates the model on the Y axis.
+ * @param {Float} speed Rotation speed. Default is 0.2.
+ */
 function rotateModel(speed=.02) {
     modelPivot.rotation.y += speed;
     dataPivot.rotation.y += speed;
 }
 
+/**
+ * Animate: Rotates the data only on the Y axis.
+ * @param {Float} speed Rotation speed. Default is 0.2.
+ */
 function rotateData(speed=.02) {
     dataPivot.rotation.y += speed;
 }
 
+/**
+ * Animate: Scales the data uniformly in all direction.
+ * @param {Float} speed Scaling speed. Default is -0.01.
+ */
 function scaleData(speed=-.01) {
     dataPivot.scale.x += speed;
     dataPivot.scale.y += speed;
     dataPivot.scale.z += speed;
 }
 
+/**
+ * Demonstration purpose: Scales the data up to a max size and then down to a minimum size and repeat.
+ */
 function scaleShowcase() {
     if (dataPivot.scale.x >= scaleMax || dataPivot.scale.x <= scaleMin) {
         scaleSpeed *= -1;
