@@ -4,9 +4,11 @@
 
 var container = document.getElementById( 'container' );
 
+var plotRange = 10;
+
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, .1, 1000 );
-camera.position.set( 0, 0, 20 );
+camera.position.set( 0, 20, 20 );
 
 var frustumSize = 1000;
 var resolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
@@ -53,7 +55,7 @@ function plotPoint(x=0, y=0, z=0, radius = 0.3, color = 0x000000) {
     return sphere
 }
 
-function drawCartesianAxes(axisLength = 4) {
+function drawCartesianAxes(axisLength = 6) {
     let xAxisPoints = [axisLength,0,0,0,0,0];
     let xAxis = drawLine(xAxisPoints,0x00ff00,5);
 
@@ -72,8 +74,34 @@ function drawCartesianAxes(axisLength = 4) {
     return axesGroup;
 }
 
+function drawRandomPoints(count=10,color=null,size=0.2) {
+    let randomColor = false;
+    if (color === null) {
+        randomColor = true;
+    }
+    var randomPointsGroup = new THREE.Group();
+    for (let i = 0; i < count; i ++) {
+        var randomX = Math.random() * (plotRange - 0) + 0;
+        var randomY = Math.random() * (plotRange - 0) + 0;
+        var randomZ = Math.random() * (plotRange - 0) + 0;
+
+        if (randomColor) {
+            var greenValue = parseInt((randomX / plotRange) * 255);
+            var blueValue = parseInt((randomY / plotRange) * 255);
+            var redValue = parseInt((randomZ / plotRange) * 255);
+            color = "#" + ((1 << 24) + (redValue << 16) + (greenValue << 8) + blueValue).toString(16).slice(1);
+        }
+        var newPoint = plotPoint(randomX, randomY, randomZ, size, color);
+        randomPointsGroup.add(newPoint);
+    }
+
+    scene.add(randomPointsGroup);
+    return randomPointsGroup;
+}
+
 function init() {
-    axesGroup = drawCartesianAxes(10);
+    axesGroup = drawCartesianAxes(plotRange);
+    let randomPoints = drawRandomPoints(300,null,0.3);
     render();
 }
 
@@ -99,7 +127,7 @@ function onWindowResize() {
 
 }
 
-window.addEventListener( 'resize', onWindowResize );
+//window.addEventListener( 'resize', onWindowResize );
 
 function render() {
 
